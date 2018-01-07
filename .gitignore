@@ -23,4 +23,6 @@ hs_err_pid*
 .gradle/
 .idea/
 /build/
-sbtest.iml
+/gradle/
+/out/
+/sbtest.iml
