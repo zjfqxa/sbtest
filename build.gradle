@@ -14,12 +14,16 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
-//apply plugin: 'com.palantir.docker'
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
 
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+apply plugin: 'org.springframework.boot'
 
 jar {
     baseName = 'gs-spring-boot'
@@ -27,11 +31,9 @@ jar {
 }
 
 repositories {
+    jcenter()
     mavenCentral()
 }
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 dependencies {
     // tag::jetty[]
@@ -50,6 +52,12 @@ dependencies {
 bootRepackage {
     mainClass = 'hello.MySbApp'
     executable = true
+
+    embeddedLaunchScriptProperties = [
+            // only works jar is a init.d service
+            // refs https://docs.spring.io/spring-boot/docs/current/reference/html/deployment-install.html
+            logFolder: "/data0/logs",
+    ]
 }
 
 task rename(type: Copy) {
@@ -60,6 +68,13 @@ task rename(type: Copy) {
 
 bootRepackage.finalizedBy rename
 
+bootRun {
+    jvmArgs = [
+            "-Dcom.sun.management.jmxremote.port=10053",
+            "-Dcom.sun.management.jmxremote.ssl=false",
+            "-Dcom.sun.management.jmxremote.authenticate=false"
+    ]
+}
 // build docker image by self
 //docker {
 //    name "cargo.caicloudprivatetest.com/caicloud/${jar.baseName}"
